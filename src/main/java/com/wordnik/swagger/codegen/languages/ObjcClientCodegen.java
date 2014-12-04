@@ -9,8 +9,8 @@ import java.io.File;
 
 public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
   protected Set<String> foundationClasses = new HashSet<String>();
-  protected String sourceFolder = "client";
-  protected static String PREFIX = "SWG";
+  protected String sourceFolder = "Classes";
+  protected static String PREFIX = "NB";
 
   public String getName() {
     return "objc";

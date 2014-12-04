@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
-#import "AFHTTPClient.h"
+#import "AFHTTPSessionManager.h"
 
-@interface SWGApiClient : AFHTTPClient
+@interface SWGApiClient : AFHTTPSessionManager
 
 @property(nonatomic, assign) NSURLRequestCachePolicy cachePolicy;
 @property(nonatomic, assign) NSTimeInterval timeoutInterval;
