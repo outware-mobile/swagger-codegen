@@ -117,7 +117,7 @@ public class DefaultGenerator implements Generator {
           String suffix = config.apiTemplateFiles().get(templateName);
           String filename = config.apiFileFolder() +
             File.separator +
-            config.toApiFilename(tag) +
+            "I" + config.toApiFilename(tag) +
             suffix;
 
           String template = readTemplate(config.templateDir() + File.separator + templateName);
