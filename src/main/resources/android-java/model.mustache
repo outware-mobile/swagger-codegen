@@ -4,6 +4,7 @@ package {{package}};
 {{/imports}}
 
 import com.wordnik.swagger.annotations.*;
+import com.google.gson.annotations.SerializedName;
 {{#models}}
 
 {{#model}}{{#description}}
@@ -12,17 +13,19 @@ import com.wordnik.swagger.annotations.*;
  **/{{/description}}
 @ApiModel(description = "{{{description}}}")
 public class {{classname}} {{#parent}}extends {{{parent}}}{{/parent}} { {{#vars}}
+
+  @SerializedName("{{name}}")
   private {{{datatype}}} {{name}} = {{{defaultValue}}};{{#allowableValues}}
-  
-  //{{^min}}public enum {{name}}Enum { {{#values}} {{.}}, {{/values}} }; 
+
+  //{{^min}}public enum {{name}}Enum { {{#values}} {{.}}, {{/values}} };
   {{/min}}{{/allowableValues}}{{/vars}}
-  
+
   {{#vars}}
   /**{{#description}}
    * {{{description}}}{{/description}}{{#minimum}}
    * minimum: {{minimum}}{{/minimum}}{{#maximum}}
    * maximum: {{maximum}}{{/maximum}}
-   **/
+   */
   @ApiModelProperty(required = {{required}}, value = "{{{description}}}")
   public {{{datatype}}} {{getter}}() {
     return {{name}};
