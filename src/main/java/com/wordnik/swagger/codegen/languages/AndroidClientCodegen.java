@@ -95,4 +95,8 @@ public class AndroidClientCodegen extends DefaultCodegen implements CodegenConfi
       type = swaggerType;
     return toModelName(type);
   }
+
+  public String toApiFilename(String name) {
+    return "I" + initialCaps(name) + "Api";
+  }
 }

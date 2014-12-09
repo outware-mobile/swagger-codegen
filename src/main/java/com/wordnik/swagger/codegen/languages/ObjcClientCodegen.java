@@ -98,7 +98,6 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
     supportingFiles.add(new SupportingFile("SWGFile.m", sourceFolder, "SWGFile.m"));
     supportingFiles.add(new SupportingFile("SWGDate.h", sourceFolder, "SWGDate.h"));
     supportingFiles.add(new SupportingFile("SWGDate.m", sourceFolder, "SWGDate.m"));
-    supportingFiles.add(new SupportingFile("Podfile.mustache", "", "Podfile"));
   }
 
   @Override
