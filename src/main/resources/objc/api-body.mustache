@@ -10,13 +10,14 @@
 @implementation {{classname}}
 static NSString * basePath = @"{{basePath}}";
 
-+({{classname}}*) apiWithHeader:(NSString*)headerValue key:(NSString*)key {
++({{classname}}*) sharedInstance {
     static {{classname}}* singletonAPI = nil;
 
-    if (singletonAPI == nil) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         singletonAPI = [[{{classname}} alloc] init];
-        [singletonAPI addHeader:headerValue forKey:key];
-    }
+    });
+
     return singletonAPI;
 }
 
@@ -114,7 +115,7 @@ static NSString * basePath = @"{{basePath}}";
     }
 
     {{/bodyParam}}
-    
+
     {{#requiredParamCount}}
     {{#requiredParams}}
     if({{paramName}} == nil) {
@@ -126,10 +127,10 @@ static NSString * basePath = @"{{basePath}}";
     SWGApiClient* client = [SWGApiClient sharedClientFromPool:basePath];
 
     {{#returnContainer}}
-    return [client dictionary: requestUrl 
-                               method: @"{{httpMethod}}" 
-                          queryParams: queryParams 
-                                 body: bodyDictionary 
+    return [client dictionary: requestUrl
+                               method: @"{{httpMethod}}"
+                          queryParams: queryParams
+                                 body: bodyDictionary
                          headerParams: headerParams
                    requestContentType: requestContentType
                   responseContentType: responseContentType
@@ -139,7 +140,7 @@ static NSString * basePath = @"{{basePath}}";
                              {{^returnBaseType}}completionBlock(error);{{/returnBaseType}}
                              return;
                          }
-                         
+
                          {{#returnBaseType}}
                          if([data isKindOfClass:[NSArray class]]){
                              NSMutableArray * objs = [[NSMutableArray alloc] initWithCapacity:[data count]];
@@ -170,10 +171,10 @@ static NSString * basePath = @"{{basePath}}";
     {{#returnSimpleType}}
     {{#returnTypeIsPrimitive}}
     {{#returnBaseType}}
-    return [client stringWithCompletionBlock: requestUrl 
-                                      method: @"{{httpMethod}}" 
-                                 queryParams: queryParams 
-                                        body: bodyDictionary 
+    return [client stringWithCompletionBlock: requestUrl
+                                      method: @"{{httpMethod}}"
+                                 queryParams: queryParams
+                                        body: bodyDictionary
                                 headerParams: headerParams
                           requestContentType: requestContentType
                          responseContentType: responseContentType
@@ -186,10 +187,10 @@ static NSString * basePath = @"{{basePath}}";
                 completionBlock(result, nil);
              }];{{/returnBaseType}}
     {{^returnBaseType}}
-    return [client stringWithCompletionBlock:requestUrl 
-                                             method:@"{{httpMethod}}" 
-                                        queryParams:queryParams 
-                                               body:bodyDictionary 
+    return [client stringWithCompletionBlock:requestUrl
+                                             method:@"{{httpMethod}}"
+                                        queryParams:queryParams
+                                               body:bodyDictionary
                                        headerParams:headerParams
                                  requestContentType: requestContentType
                                 responseContentType: responseContentType
@@ -202,10 +203,10 @@ static NSString * basePath = @"{{basePath}}";
                     }];
     {{/returnBaseType}}{{/returnTypeIsPrimitive}}
     {{#returnBaseType}}{{^returnTypeIsPrimitive}}
-    return [client dictionary:requestUrl 
-                              method:@"{{httpMethod}}" 
-                         queryParams:queryParams 
-                                body:bodyDictionary 
+    return [client dictionary:requestUrl
+                              method:@"{{httpMethod}}"
+                         queryParams:queryParams
+                                body:bodyDictionary
                         headerParams:headerParams
                   requestContentType:requestContentType
                  responseContentType:responseContentType

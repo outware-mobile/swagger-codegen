@@ -23,11 +23,12 @@ public interface I{{classname}} {
     {{{notes}}}
     {{#allParams}}@param {{paramName}} {{{description}}}{{#hasMore}}
     {{/hasMore}}{{/allParams}}
+    @param callback Retrofit callback for successful response
   */
   @{{httpMethod}}("{{path}}")
-  public {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{nickname}} (
-        {{#allParams}}{{#isQueryParam}}@Query{{/isQueryParam}}{{#isPathParam}}@Path{{/isPathParam}}{{#isHeaderParam}}@Header{{/isHeaderParam}}{{#isBodyParam}}@Body{{/isBodyParam}}{{^isBodyParam}}("{{paramName}}"){{/isBodyParam}} {{{dataType}}} {{paramName}}{{#hasMore}},
-        {{/hasMore}}{{/allParams}} );
+  public void {{nickname}} (
+        {{#allParams}}{{#isQueryParam}}@Query{{/isQueryParam}}{{#isPathParam}}@Path{{/isPathParam}}{{#isHeaderParam}}@Header{{/isHeaderParam}}{{#isBodyParam}}@Body{{/isBodyParam}}{{^isBodyParam}}("{{paramName}}"){{/isBodyParam}} {{{dataType}}} {{paramName}},
+        {{/allParams}}Callback<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}}> callback );
   {{/operation}}
 }
 {{/operations}}
