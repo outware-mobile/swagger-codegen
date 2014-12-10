@@ -1,13 +1,12 @@
 package com.wordnik.swagger.codegen;
 
-import com.wordnik.swagger.util.Json;
 import com.wordnik.swagger.models.*;
 import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.properties.*;
+import com.wordnik.swagger.util.Json;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
-import java.io.File;
 
 public class DefaultCodegen {
   protected String outputFolder = "";
@@ -192,18 +191,9 @@ public class DefaultCodegen {
 
     instantiationTypes = new HashMap<String, String>();
 
-    reservedWords = new HashSet<String> (
-      Arrays.asList(
-        "abstract", "continue", "for", "new", "switch", "assert", 
-        "default", "if", "package", "synchronized", "boolean", "do", "goto", "private", 
-        "this", "break", "double", "implements", "protected", "throw", "byte", "else", 
-        "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", 
-        "catch", "extends", "int", "short", "try", "char", "final", "interface", "static", 
-        "void", "class", "finally", "long", "strictfp", "volatile", "const", "float", 
-        "native", "super", "while")
-    );
+    reservedWords = new HashSet<String>();
 
-    importMapping = new HashMap<String, String> ();
+    importMapping = new HashMap<String, String>();
     importMapping.put("BigDecimal", "java.math.BigDecimal");
     importMapping.put("UUID", "java.util.UUID");
     importMapping.put("File", "java.io.File");
@@ -321,6 +311,8 @@ public class DefaultCodegen {
   }
 
   public String toApiName(String name) {
+    if(name.length() == 0)
+      return "DefaultApi";
     return initialCaps(name) + "Api";
   }
 
@@ -329,7 +321,7 @@ public class DefaultCodegen {
   }
 
   public CodegenModel fromModel(String name, Model model) {
-    CodegenModel m = new CodegenModel();
+    CodegenModel m = CodegenModelFactory.newInstance(CodegenModelType.MODEL);
     if(reservedWords.contains(name))
       m.name = escapeReservedWord(name);
     else
@@ -428,7 +420,7 @@ public class DefaultCodegen {
   }
 
   public CodegenProperty fromProperty(String name, Property p) {
-    CodegenProperty property = new CodegenProperty();
+    CodegenProperty property = CodegenModelFactory.newInstance(CodegenModelType.PROPERTY);
 
     property.name = toVarName(name);
     property.baseName = name;
@@ -513,7 +505,7 @@ public class DefaultCodegen {
   }
 
   public CodegenOperation fromOperation(String path, String httpMethod, Operation operation){
-    CodegenOperation op = new CodegenOperation();
+    CodegenOperation op = CodegenModelFactory.newInstance(CodegenModelType.OPERATION);
     Set<String> imports = new HashSet<String>();
 
     String operationId = operation.getOperationId();
@@ -589,14 +581,7 @@ public class DefaultCodegen {
       for(String responseCode: operation.getResponses().keySet()) {
         Response response = operation.getResponses().get(responseCode);
         if(response != methodResponse) {
-          CodegenResponse r = new CodegenResponse();
-          if("default".equals(responseCode))
-            r.code = "0";
-          else
-            r.code = responseCode;
-          r.message = response.getDescription();
-          r.schema = response.getSchema();
-          r.examples = toExamples(response.getExamples());
+          CodegenResponse r = fromResponse(responseCode, response);
           op.responses.add(r);
         }
         for(int i = 0; i < op.responses.size() - 1; i++) {
@@ -606,7 +591,8 @@ public class DefaultCodegen {
       }
     }
 
-    if(methodResponse != null && methodResponse.getSchema() != null) {
+    if(methodResponse != null) {
+     if (methodResponse.getSchema() != null) {
       CodegenProperty cm = fromProperty("response", methodResponse.getSchema());
 
       Property responseProperty = methodResponse.getSchema();
@@ -632,6 +618,8 @@ public class DefaultCodegen {
         op.returnSimpleType = true;
       if (languageSpecificPrimitives().contains(op.returnBaseType) || op.returnBaseType == null)
         op.returnTypeIsPrimitive = true;
+     }
+     addHeaders(methodResponse, op.responseHeaders);
     }
 
     if(op.returnBaseType == null) {
@@ -656,92 +644,7 @@ public class DefaultCodegen {
 
     if(parameters != null) {
       for(Parameter param : parameters) {
-        CodegenParameter p = new CodegenParameter();
-        p.baseName = param.getName();
-        p.description = param.getDescription();
-        p.required = param.getRequired();
-        
-        if(param instanceof SerializableParameter) {
-          SerializableParameter qp = (SerializableParameter) param;
-          Property property = null;
-          String collectionFormat = null;
-          if("array".equals(qp.getType())) {
-            Property inner = qp.getItems();
-            property = new ArrayProperty(inner);
-            collectionFormat = qp.getCollectionFormat();
-            CodegenProperty pr = fromProperty("inner", inner);
-            p.baseType = pr.datatype;
-            imports.add(pr.baseType);
-          }
-          else
-            property = PropertyBuilder.build(qp.getType(), qp.getFormat(), null);
-          if(property == null) {
-            System.out.println("couldn't find property for parameter: ");
-            Json.prettyPrint(param);
-          }
-          CodegenProperty model = fromProperty(qp.getName(), property);
-          p.collectionFormat = collectionFormat;
-          p.dataType = model.datatype;
-          p.paramName = toParamName(qp.getName());
-
-          if(model.complexType != null) {
-            imports.add(model.complexType);
-          }
-        }
-        else {
-          BodyParameter bp = (BodyParameter) param;
-          Model model = bp.getSchema();
-
-          if(model instanceof ModelImpl) {
-            ModelImpl impl = (ModelImpl) model;
-            CodegenModel cm = fromModel(bp.getName(), impl);
-            if(cm.emptyVars != null && cm.emptyVars == false) {
-              p.dataType = getTypeDeclaration(cm.classname);
-              imports.add(p.dataType);
-            }
-            else {
-              // TODO: missing format, so this will not always work
-              Property prop = PropertyBuilder.build(impl.getType(), null, null);
-              CodegenProperty cp = fromProperty("property", prop);
-              if(cp != null) {
-                p.dataType = cp.datatype;
-              }
-            }
-          }
-          else if(model instanceof ArrayModel) {
-            // to use the built-in model parsing, we unwrap the ArrayModel
-            // and get a single property from it
-            ArrayModel impl = (ArrayModel) model;
-            CodegenModel cm = fromModel(bp.getName(), impl);
-            // get the single property
-            ArrayProperty ap = new ArrayProperty().items(impl.getItems());
-            CodegenProperty cp = fromProperty("inner", ap);
-            if(cp.complexType != null) {
-              imports.add(cp.complexType);
-            }
-            imports.add(cp.baseType);
-            p.dataType = cp.datatype;
-            p.isContainer = true;
-          }
-          else{
-            Model sub = bp.getSchema();
-            if(sub instanceof RefModel) {
-              String name = ((RefModel)sub).getSimpleRef();
-              if(typeMapping.containsKey(name))
-                name = typeMapping.get(name);
-              else {
-                name = toModelName(name);
-                if(defaultIncludes.contains(name)) {
-                  imports.add(name);
-                }
-                imports.add(name);
-                name = getTypeDeclaration(name);
-              }
-              p.dataType = name;
-            }
-          }
-          p.paramName = toParamName(bp.getName());
-        }
+        CodegenParameter p = fromParameter(param, imports);
         allParams.add(p);
         if(param instanceof QueryParameter) {
           queryParams.add(p);
@@ -788,8 +691,115 @@ public class DefaultCodegen {
 
     if(op.allParams.size() > 0) 
       op.hasParams = true;
-    op.externalDocs = operation.getExternalDocs(); 
+    op.externalDocs = operation.getExternalDocs();
+
     return op;
+  }
+
+  public CodegenResponse fromResponse(String responseCode, Response response) {
+    CodegenResponse r = CodegenModelFactory.newInstance(CodegenModelType.RESPONSE);
+    if("default".equals(responseCode))
+      r.code = "0";
+    else
+      r.code = responseCode;
+    r.message = response.getDescription();
+    r.schema = response.getSchema();
+    r.examples = toExamples(response.getExamples());
+    return r;
+  }
+
+  public CodegenParameter fromParameter(Parameter param, Set<String> imports) {
+    CodegenParameter p = CodegenModelFactory.newInstance(CodegenModelType.PARAMETER);
+    p.baseName = param.getName();
+    p.description = param.getDescription();
+    p.required = param.getRequired();
+
+    if(param instanceof SerializableParameter) {
+      SerializableParameter qp = (SerializableParameter) param;
+      Property property = null;
+      String collectionFormat = null;
+      if("array".equals(qp.getType())) {
+        Property inner = qp.getItems();
+        if(inner == null) {
+          System.out.println("warning!  No inner type supplied for array parameter \"" + qp.getName() + "\", using String");
+          inner = new StringProperty().description("//TODO automatically added by swagger-codegen");
+        }
+        property = new ArrayProperty(inner);
+        collectionFormat = qp.getCollectionFormat();
+        CodegenProperty pr = fromProperty("inner", inner);
+        p.baseType = pr.datatype;
+        imports.add(pr.baseType);
+      }
+      else
+        property = PropertyBuilder.build(qp.getType(), qp.getFormat(), null);
+      if(property == null) {
+        System.out.println("warning!  Property type \"" + qp.getType() + "\" not found for parameter \"" + param.getName() + "\", using String");
+        property = new StringProperty().description("//TODO automatically added by swagger-codegen.  Type was " + qp.getType() + " but not supported");
+      }
+      CodegenProperty model = fromProperty(qp.getName(), property);
+      p.collectionFormat = collectionFormat;
+      p.dataType = model.datatype;
+      p.paramName = toParamName(qp.getName());
+
+      if(model.complexType != null) {
+        imports.add(model.complexType);
+      }
+    }
+    else {
+      BodyParameter bp = (BodyParameter) param;
+      Model model = bp.getSchema();
+
+      if(model instanceof ModelImpl) {
+        ModelImpl impl = (ModelImpl) model;
+        CodegenModel cm = fromModel(bp.getName(), impl);
+        if(cm.emptyVars != null && cm.emptyVars == false) {
+          p.dataType = getTypeDeclaration(cm.classname);
+          imports.add(p.dataType);
+        }
+        else {
+          // TODO: missing format, so this will not always work
+          Property prop = PropertyBuilder.build(impl.getType(), null, null);
+          CodegenProperty cp = fromProperty("property", prop);
+          if(cp != null) {
+            p.dataType = cp.datatype;
+          }
+        }
+      }
+      else if(model instanceof ArrayModel) {
+        // to use the built-in model parsing, we unwrap the ArrayModel
+        // and get a single property from it
+        ArrayModel impl = (ArrayModel) model;
+        CodegenModel cm = fromModel(bp.getName(), impl);
+        // get the single property
+        ArrayProperty ap = new ArrayProperty().items(impl.getItems());
+        CodegenProperty cp = fromProperty("inner", ap);
+        if(cp.complexType != null) {
+          imports.add(cp.complexType);
+        }
+        imports.add(cp.baseType);
+        p.dataType = cp.datatype;
+        p.isContainer = true;
+      }
+      else{
+        Model sub = bp.getSchema();
+        if(sub instanceof RefModel) {
+          String name = ((RefModel)sub).getSimpleRef();
+          if(typeMapping.containsKey(name))
+            name = typeMapping.get(name);
+          else {
+            name = toModelName(name);
+            if(defaultIncludes.contains(name)) {
+              imports.add(name);
+            }
+            imports.add(name);
+            name = getTypeDeclaration(name);
+          }
+          p.dataType = name;
+        }
+      }
+      p.paramName = toParamName(bp.getName());
+    }
+    return p;
   }
 
   protected List<Map<String, String>> toExamples(Map<String, String> examples) {
@@ -806,6 +816,14 @@ public class DefaultCodegen {
       output.add(kv);
     }
     return output;
+  }
+
+  private void addHeaders(Response response, List<CodegenProperty> target) {
+    if (response.getHeaders() != null) {
+      for (Map.Entry<String, Property> headers : response.getHeaders().entrySet()) {
+        target.add(fromProperty(headers.getKey(), headers.getValue()));
+      }
+    }
   }
 
   private List<CodegenParameter> addHasMore(List<CodegenParameter> objs) {
