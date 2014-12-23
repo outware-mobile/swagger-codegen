@@ -7,27 +7,27 @@
 - (id) initWithValues:(NSString*)input {
     if([input isKindOfClass:[NSString class]]){
         NSDateFormatter* df = [NSDateFormatter new];
-        NSLocale *locale = [[NSLocale new]                        
+        NSLocale *locale = [[NSLocale new]
                             initWithLocaleIdentifier:@"en_US_POSIX"];
         [df setLocale:locale];
-        [df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
+        [df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZZZZ"];
 
         _date = [df dateFromString:input];
     }
     else if([input isKindOfClass:[NSNumber class]]) {
         NSTimeInterval interval = [input doubleValue];
-        _date = [[NSDate alloc] initWithTimeIntervalSince1970:interval];        
+        _date = [[NSDate alloc] initWithTimeIntervalSince1970:interval];
     }
     return self;
 }
 
 -(NSString*) toString {
     NSDateFormatter* df = [NSDateFormatter new];
-    NSLocale *locale = [[NSLocale new]                        
+    NSLocale *locale = [[NSLocale new]
                         initWithLocaleIdentifier:@"en_US_POSIX"];
     [df setLocale:locale];
-    [df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
-    
+    [df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZZZZ"];
+
     return [df stringFromDate:_date];
 }
 
