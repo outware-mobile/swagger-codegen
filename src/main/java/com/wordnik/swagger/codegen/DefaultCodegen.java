@@ -27,6 +27,12 @@ public class DefaultCodegen {
     if(additionalProperties.containsKey("templateDir")) {
       this.setTemplateDir((String)additionalProperties.get("templateDir"));
     }
+    if(additionalProperties.containsKey("apiPackage")) {
+      this.apiPackage = (String)additionalProperties.get("apiPackage");
+    }
+    if(additionalProperties.containsKey("modelPackage")) {
+      this.modelPackage = (String)additionalProperties.get("modelPackage");
+    }
   }
 
   // override with any special post-processing

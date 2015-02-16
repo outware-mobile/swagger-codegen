@@ -37,6 +37,16 @@ public class Codegen extends DefaultGenerator {
     options.addOption("t", "template-dir", true, "folder containing the template files");
     options.addOption("d", "debug-info", false, "prints additional info for debugging");
 
+    Option property  = OptionBuilder.withArgName( "property=value" )
+      .hasArgs(2)
+      .withValueSeparator()
+      .withDescription( "init client property value for the chosen client language" )
+      .withLongOpt("client-property")
+      .create("c");
+
+    options.addOption(property);
+
+
     ClientOptInput clientOptInput = new ClientOptInput();
     ClientOpts clientOpts = new ClientOpts();
     Swagger swagger = null;
@@ -72,6 +82,12 @@ public class Codegen extends DefaultGenerator {
         swagger = new SwaggerParser().read(cmd.getOptionValue("i"));
       if (cmd.hasOption("t"))
         clientOpts.getProperties().put("templateDir", String.valueOf(cmd.getOptionValue("t")));
+
+      Properties properties = cmd.getOptionProperties("c");
+      if (!properties.isEmpty())
+        for (String name: properties.stringPropertyNames())
+            clientOpts.getProperties().put(name, properties.getProperty(name));
+
     }
     catch (Exception e) {
       usage(options);

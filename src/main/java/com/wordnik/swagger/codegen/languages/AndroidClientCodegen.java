@@ -35,15 +35,7 @@ public class AndroidClientCodegen extends DefaultCodegen implements CodegenConfi
     additionalProperties.put("artifactId", artifactId);
     additionalProperties.put("artifactVersion", artifactVersion);
 
-    supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml"));
-    supportingFiles.add(new SupportingFile("apiInvoker.mustache", 
-      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "ApiInvoker.java"));
-    supportingFiles.add(new SupportingFile("httpPatch.mustache", 
-      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "HttpPatch.java"));
-    supportingFiles.add(new SupportingFile("jsonUtil.mustache", 
-      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "JsonUtil.java"));
-    supportingFiles.add(new SupportingFile("apiException.mustache", 
-      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "ApiException.java"));
+    setupSupportingFiles();
 
     languageSpecificPrimitives = new HashSet<String>(
       Arrays.asList(
@@ -58,6 +50,36 @@ public class AndroidClientCodegen extends DefaultCodegen implements CodegenConfi
       );
     instantiationTypes.put("array", "ArrayList");
     instantiationTypes.put("map", "HashMap");
+  }
+
+  private void setupSupportingFiles() {
+    supportingFiles.clear();
+    supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml"));
+    supportingFiles.add(new SupportingFile("apiInvoker.mustache",
+      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "ApiInvoker.java"));
+    supportingFiles.add(new SupportingFile("httpPatch.mustache",
+      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "HttpPatch.java"));
+    supportingFiles.add(new SupportingFile("jsonUtil.mustache",
+      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "JsonUtil.java"));
+    supportingFiles.add(new SupportingFile("apiException.mustache",
+      (sourceFolder + File.separator + invokerPackage).replace(".", java.io.File.separator), "ApiException.java"));
+  }
+
+  @Override
+  public void processOpts() {
+    super.processOpts();
+
+    boolean setupSupportingFiles = false;
+    if(additionalProperties.containsKey("invokerPackage")) {
+      this.invokerPackage = (String)additionalProperties.get("invokerPackage");
+      setupSupportingFiles = true;
+    }
+    if(additionalProperties.containsKey("sourceFolder")) {
+      this.sourceFolder = (String)additionalProperties.get("sourceFolder");
+      setupSupportingFiles = true;
+    }
+    if (setupSupportingFiles)
+      setupSupportingFiles();
   }
 
   @Override
