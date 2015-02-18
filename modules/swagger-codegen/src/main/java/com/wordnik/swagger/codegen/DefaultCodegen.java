@@ -612,10 +612,18 @@ public class DefaultCodegen {
           CodegenResponse r = fromResponse(responseCode, response);
           op.responses.add(r);
         }
-        for(int i = 0; i < op.responses.size() - 1; i++) {
-          CodegenResponse r = op.responses.get(i);
-          r.hasMore = new Boolean(true);
+        if(!responseCode.startsWith("2")) {
+          CodegenResponse error = fromResponse(responseCode, response);
+          op.errorList.add(error);
         }
+      }
+      for(int i = 0; i < op.responses.size() - 1; i++) {
+        CodegenResponse r = op.responses.get(i);
+        r.hasMore = new Boolean(true);
+      }
+      for(int i = 0; i < op.errorList.size() - 1; i++) {
+        CodegenResponse r = op.errorList.get(i);
+        r.hasMore = new Boolean(true);
       }
     }
 
@@ -743,6 +751,7 @@ public class DefaultCodegen {
     r.message = response.getDescription();
     r.schema = response.getSchema();
     r.examples = toExamples(response.getExamples());
+    r.responseModel = getSwaggerType(response.getSchema());
     return r;
   }
 

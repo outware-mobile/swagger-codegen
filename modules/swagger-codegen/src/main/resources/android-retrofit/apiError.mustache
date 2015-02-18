@@ -1,0 +1,40 @@
+package {{invokerPackage}};
+
+/**
+* Generic error class for errors returned by the API
+*/
+public class ApiError<T>{
+
+    private T error;
+
+    private int code;
+
+    private Throwable exception;
+
+    public ApiError(int code, T error, Throwable exception) {
+        super();
+        this.code = code;
+        this.error = error;
+    }
+
+    /**
+    * Returns error model returned by the API or custom error object created by Swagger
+    */
+    public T getError() {
+        return error;
+    }
+
+    /*
+    * Returns status code returned by the API or custom code created by Swagger
+    */
+    public int getCode() {
+        return code;
+    }
+
+    /**
+    * Returns the cause of the error
+    */
+    public Throwable getException() {
+        return exception;
+    }
+}

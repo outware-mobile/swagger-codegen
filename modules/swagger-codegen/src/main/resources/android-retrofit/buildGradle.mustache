@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+version = '{{clientVersion}}'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'com.squareup.retrofit:retrofit:1.8.0'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives file("./build/libs/" + project.name + "-" + version + ".jar")
+    archives sourcesJar
+    archives javadocJar
+}
+
+task uploadRelease(dependsOn: build) << {
+    tasks.uploadArchives.execute()
+}
+
+uploadArchives {
+    repositories {
+    mavenDeployer {
+        repository(url: "http://your_maven_repo")
+
+        pom.groupId = "{{groupId}}"
+        pom.artifactId = "{{artifactId}}"
+        pom.version = version
+    }
+}
+}

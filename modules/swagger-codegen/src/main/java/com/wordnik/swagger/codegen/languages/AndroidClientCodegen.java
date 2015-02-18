@@ -97,6 +97,8 @@ public class AndroidClientCodegen extends DefaultCodegen implements CodegenConfi
   @Override
   public String getSwaggerType(Property p) {
     String swaggerType = super.getSwaggerType(p);
+    if (swaggerType == null)
+      return null;
     String type = null;
     if(typeMapping.containsKey(swaggerType)) {
       type = typeMapping.get(swaggerType);

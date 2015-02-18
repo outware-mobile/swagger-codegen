@@ -1,0 +1,116 @@
+package {{package}};
+
+import {{invokerPackage}}.ApiCallback;
+import {{invokerPackage}}.ApiConsts;
+import {{invokerPackage}}.ApiError;
+import {{invokerPackage}}.ApiSetup;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import retrofit.http.*;
+
+import {{modelPackage}}.*;
+
+{{#imports}}import {{import}};
+{{/imports}}
+
+{{#operations}}
+/**
+* This class provides api operations for {{classname}}
+*/
+public class {{classname}} {
+    private {{classname}}Service service;
+    private Gson gson;
+
+    public {{classname}}() {
+        service = ApiSetup.getInstance().getRestAdapter().create({{classname}}Service.class);
+        gson = new GsonBuilder().setDateFormat(ApiConsts.DATE_FORMAT).create();
+    }
+
+    private interface {{classname}}Service {
+    {{#operation}}
+        /**
+        * {{summary}}<br/>
+        * {{#allParams}}@param {{paramName}} {{description}}{{#hasMore}}
+        * {{/hasMore}}{{/allParams}}
+        * @param callback Retrofit callback for responses (success and failure)
+        */
+        @{{httpMethod}}("{{path}}")
+        public void {{nickname}} ({{#allParams}}{{#isPathParam}}@Path{{/isPathParam}}{{#isHeaderParam}}@Header{{/isHeaderParam}}{{#isBodyParam}}@Body{{/isBodyParam}}{{#isQueryParam}}@Query{{/isQueryParam}}{{#isFormParam}}@Field{{/isFormParam}}{{^isBodyParam}}("{{paramName}}"){{/isBodyParam}} {{{dataType}}} {{paramName}}, {{/allParams}}Callback<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}}> callback);
+    {{/operation}}
+    }
+
+    {{#operation}}
+    /**
+    * {{summary}}<br/>
+    * {{notes}}<br/>
+    * {{#allParams}}@param {{paramName}} {{description}}{{#hasMore}}
+    * {{/hasMore}}{{/allParams}}
+    * @param apiCallback Retrofit callback for responses (success and failure)<br/>
+    * SUCCESS Callback with response model of type {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}}<br/>
+    * ERRORS:
+    * {{#errorList}} - Code: {{code}}, Reason: "{{message}}", Response Model: {{#responseModel}}{{{responseModel}}}{{/responseModel}}{{^responseModel}}Object{{/responseModel}}<br/>
+    * {{/errorList}}
+    */
+    public void {{nickname}}({{#allParams}}{{{dataType}}} {{paramName}}, {{/allParams}}final ApiCallback<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}}> apiCallback) {
+
+        {{#allParams}}{{#required}}if ({{paramName}} == null) {
+            throw new IllegalArgumentException("Required argument {{paramName}} cannot be null!");
+        }{{/required}}{{/allParams}}
+
+        service.{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}new retrofit.Callback<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}}>() {
+            @Override
+            public void success({{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}} apiModel, Response response) {
+                apiCallback.onSuccess(apiModel);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                ApiError apiError = null;
+
+                try {
+                    switch (error.getKind()) {
+                    case CONVERSION:
+                        apiError =
+                        new ApiError<String>(ApiConsts.CONVERSION_ERROR_CODE, ApiConsts.CONVERSION_ERROR_STRING, error.getCause());
+                        break;
+                    case HTTP:
+                        int status = error.getResponse().getStatus();
+                        switch (status) {
+                        {{#errorList}}case {{code}}:
+                            {{#schema}}apiError = new ApiError<{{responseModel}}>(status, gson.fromJson(error.getResponse().toString(), {{responseModel}}.class), error.getCause());{{/schema}}{{^schema}}apiError = new ApiError<String>(status, "{{message}}", error.getCause());{{/schema}}
+                            break;
+                        {{/errorList}}default:
+                            apiError = new ApiError<String>(status, ApiConsts.UNSPECIFIED_ERROR_STRING, error.getCause());
+                            break;
+                        }
+                        break;
+                    case NETWORK:
+                        apiError = new ApiError<String>(ApiConsts.NETWORK_ERROR_CODE, ApiConsts.NETWORK_ERROR_STRING, error.getCause());
+                        break;
+                    case UNEXPECTED:
+                        apiError = new ApiError<String>(ApiConsts.UNEXPECTED_ERROR_CODE, ApiConsts.UNEXPECTED_ERROR_STRING, error.getCause());
+                        break;
+                    default:
+                        apiError = new ApiError<String>(ApiConsts.UNEXPECTED_ERROR_CODE, ApiConsts.UNEXPECTED_ERROR_STRING, error.getCause());
+                        break;
+                    }
+                } catch (Exception exception) {
+                    apiError =
+                        new ApiError<String>(ApiConsts.UNEXPECTED_ERROR_CODE, ApiConsts.UNEXPECTED_ERROR_STRING, exception);
+                }
+
+                apiCallback.onError(apiError);
+            }
+        });
+    }
+    {{/operation}}
+}
+{{/operations}}

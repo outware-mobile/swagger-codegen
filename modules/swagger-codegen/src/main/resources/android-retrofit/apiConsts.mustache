@@ -1,0 +1,52 @@
+package {{invokerPackage}};
+
+/**
+* This class contains constants used by other API classes
+*/
+public class ApiConsts {
+
+    /**
+    * Your endpoint base path
+    */
+    public static String BASE_PATH = "{{basePath}}";
+
+    /**
+    * Error code for unexpected errors
+    */
+    public static final int UNEXPECTED_ERROR_CODE = -1;
+
+    /**
+    * Error code for network errors
+    */
+    public static final int NETWORK_ERROR_CODE = -2;
+
+    /**
+    * Error code for retorfit conversion errors
+    */
+    public static final int CONVERSION_ERROR_CODE = -3;
+
+    /**
+    * Error name for unexpected errors
+    */
+    public static final String UNEXPECTED_ERROR_STRING = "Unexpected Error";
+
+    /**
+    * Error name for network errors
+    */
+    public static final String NETWORK_ERROR_STRING = "Connection Error";
+
+    /**
+    * Error name for retrofit conversion errors
+    */
+    public static final String CONVERSION_ERROR_STRING = "Retrofit Conversion Error";
+
+    /**
+    * Date format used to deserialise json responses
+    */
+    public static String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:sszzzz";
+
+    /**
+    * Error message for unspecified errors
+    */
+    public static final String UNSPECIFIED_ERROR_STRING = "Unspecified error";
+}

@@ -1,0 +1,18 @@
+package {{invokerPackage}};
+
+/**
+* Callback that will be returned to the Android application
+*/
+public interface ApiCallback<T> {
+    /**
+    * Called when a successful response is returned
+    * @param response model object returned by the API
+    */
+    void onSuccess(T response);
+
+    /**
+    * Called when an error happens to the API request
+    * @param error {@link {{invokerPackage}}.ApiError}
+    */
+    void onError(ApiError error);
+}

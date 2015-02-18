@@ -7,4 +7,5 @@ public class CodegenResponse {
   public Boolean hasMore;
   public List<Map<String, String>> examples;
   Object schema;
+  public String responseModel;
 }
