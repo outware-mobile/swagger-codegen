@@ -1,0 +1,82 @@
+package {{invokerPackage}};
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
+import retrofit.RestAdapter.Builder;
+
+/**
+* A singleton class to initialise and persist base components for making a retrofit request
+*/
+public class ApiAdapter implements RequestInterceptor {
+    private static ApiAdapter INSTANCE;
+
+    private final RestAdapter restAdapter = new Builder().setEndpoint(ApiConsts.BASE_PATH).setRequestInterceptor(this).build();
+
+    private final Map<String, String> defaultHeaders = new HashMap<String, String>();
+
+    protected Gson gson = new GsonBuilder().setDateFormat(ApiConsts.DATE_FORMAT).create();
+
+    private ApiAdapter() {
+        // private constructor
+    }
+
+    /**
+     * Singleton instance of @ApiAdapter
+     * @return
+     */
+    public static ApiAdapter getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ApiAdapter();
+        }
+        return INSTANCE;
+    }
+
+    /**
+     * Set custom Gson
+     * @param gson
+     */
+    public void setGson(Gson gson) {
+        this.gson = gson;
+    }
+
+    /**
+     * Retrofit Rest Adapter
+     */
+    public RestAdapter getRestAdapter() {
+        return restAdapter;
+    }
+
+    /**
+     * Add default header parameter. This parameter will be appended to each request.
+     * @param key
+     * @param value
+     */
+    public void addHeader(String key, String value) {
+        defaultHeaders.put(key, value);
+    }
+
+    /**
+     * Remove default header parameter.
+     * @param key
+     */
+    public void removeHeader(String key) {
+        defaultHeaders.remove(key);
+    }
+
+    @Override
+    public void intercept(RequestFacade request) {
+        // add all default headers
+        for (String key : defaultHeaders.keySet()) {
+            String value = defaultHeaders.get(key);
+            if (value != null) {
+                request.addHeader(key, value);
+            }
+        }
+    }
+}

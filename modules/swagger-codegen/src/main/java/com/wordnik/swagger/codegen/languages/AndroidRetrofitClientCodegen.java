@@ -31,8 +31,8 @@ public class AndroidRetrofitClientCodegen extends AndroidClientCodegen implement
       (sourceFolder + File.separator + invokerPackage).replace(".", File.separator), "ApiCallback.java"));
     supportingFiles.add(new SupportingFile("apiError.mustache",
       (sourceFolder + File.separator + invokerPackage).replace(".", File.separator), "ApiError.java"));
-    supportingFiles.add(new SupportingFile("apiSetup.mustache",
-      (sourceFolder + File.separator + invokerPackage).replace(".", File.separator), "ApiSetup.java"));
+    supportingFiles.add(new SupportingFile("apiAdapter.mustache",
+      (sourceFolder + File.separator + invokerPackage).replace(".", File.separator), "ApiAdapter.java"));
   }
 
 }

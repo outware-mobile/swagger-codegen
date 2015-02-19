@@ -1,15 +1,13 @@
 package {{package}};
 
+import {{invokerPackage}}.ApiAdapter;
 import {{invokerPackage}}.ApiCallback;
 import {{invokerPackage}}.ApiConsts;
 import {{invokerPackage}}.ApiError;
-import {{invokerPackage}}.ApiSetup;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -26,14 +24,28 @@ import {{modelPackage}}.*;
 * This class provides api operations for {{classname}}
 */
 public class {{classname}} {
-    private {{classname}}Service service;
-    private Gson gson;
+    private static {{classname}} INSTANCE;
 
-    public {{classname}}() {
-        service = ApiSetup.getInstance().getRestAdapter().create({{classname}}Service.class);
-        gson = new GsonBuilder().setDateFormat(ApiConsts.DATE_FORMAT).create();
+    private final {{classname}}Service service = ApiAdapter.getInstance().getRestAdapter().create({{classname}}Service.class);
+
+    private {{classname}}() {
+        // private constructor
     }
 
+    /**
+     * Singleton Instance
+     * @return instance of {{classname}}
+     */
+    public static {{classname}} getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new PetApi();
+        }
+        return INSTANCE;
+    }
+
+    /**
+     * Retrofit Interface
+     */
     private interface {{classname}}Service {
     {{#operation}}
         /**
