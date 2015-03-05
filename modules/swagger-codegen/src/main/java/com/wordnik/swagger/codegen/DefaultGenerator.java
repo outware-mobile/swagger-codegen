@@ -44,10 +44,15 @@ public class DefaultGenerator implements Generator {
           config.additionalProperties().put("appDescription", info.getDescription());
         if(info.getContact() != null) {
           Contact contact = info.getContact();
-          config.additionalProperties().put("infoUrl", contact.getUrl());
+          if (contact.getName() != null)
+            config.additionalProperties().put("infoName", contact.getName());
+          if (contact.getUrl() != null)
+            config.additionalProperties().put("infoUrl", contact.getUrl());
           if(contact.getEmail() != null)
             config.additionalProperties().put("infoEmail", contact.getEmail());
         }
+        if(info.getVersion() != null)
+          config.additionalProperties().put("appVersion", info.getVersion());
         if(info.getLicense() != null) {
           License license = info.getLicense();
           if(license.getName() != null)
