@@ -26,7 +26,7 @@
 
  return type: {{returnType}}
  */
--(NSNumber*) {{nickname}}WithCompletionBlock {{^allParams}}:{{/allParams}}{{#allParams}}{{#secondaryParam}}     {{paramName}}{{/secondaryParam}}:({{{dataType}}}) {{paramName}} {{#hasMore}}
+-(NSNumber*) {{nickname}} {{^allParams}}:{{/allParams}}{{#allParams}}{{#secondaryParam}}     {{paramName}}{{/secondaryParam}}:({{{dataType}}}) {{paramName}} {{#hasMore}}
 {{/hasMore}}{{/allParams}}
     {{#returnBaseType}}{{#hasParams}}
     completionHandler: {{/hasParams}}(void (^)({{returnType}} output, NSError* error))completionBlock;{{/returnBaseType}}

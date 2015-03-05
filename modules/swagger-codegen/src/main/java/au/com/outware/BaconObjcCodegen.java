@@ -3,7 +3,7 @@ package au.com.outware;
 import com.google.common.base.CaseFormat;
 import com.wordnik.swagger.codegen.SupportingFile;
 import com.wordnik.swagger.codegen.languages.ObjcClientCodegen;
-
+import com.wordnik.swagger.models.Operation;
 
 
 /**
@@ -39,11 +39,18 @@ public class BaconObjcCodegen extends ObjcClientCodegen {
     // handle header params
     if (paramName.startsWith("X-")) {
       paramName = paramName.replaceFirst("X-", "").replace("-", "_");
-      paramName = paramName.replace("-", "_");
       paramName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, paramName);
     }
 
     return paramName;
   }
 
+  @Override
+  public String toOperationId(String operationId, Operation operation) {
+    if (operation.getParameters().size() > 0) {
+      String firstParam = toParamName(operation.getParameters().get(0).getName());
+      operationId += "With" + initialCaps(firstParam);
+    }
+    return operationId;
+  }
 }

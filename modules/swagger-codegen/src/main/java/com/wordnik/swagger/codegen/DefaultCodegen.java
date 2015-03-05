@@ -141,7 +141,7 @@ public class DefaultCodegen {
     return name;
   }
 
-  public String toOperationId(String operationId) { return operationId; }
+  public String toOperationId(String operationId, Operation operation) { return operationId; }
 
   public String toVarName(String name) {
     if(reservedWords.contains(name))
@@ -596,7 +596,7 @@ public class DefaultCodegen {
       LOGGER.warn("generated operationId " + operationId);
     }
     op.path = path;
-    op.operationId = toOperationId(operationId);
+    op.operationId = toOperationId(operationId, operation);
     op.summary = escapeText(operation.getSummary());
     op.notes = escapeText(operation.getDescription());
     op.tags = operation.getTags();
@@ -732,7 +732,7 @@ public class DefaultCodegen {
     // op.cookieParams = cookieParams;
     op.formParams = addHasMore(formParams);
     // legacy support
-    op.nickname = operationId;
+    op.nickname = op.operationId;
 
     if(op.allParams.size() > 0) 
       op.hasParams = true;
