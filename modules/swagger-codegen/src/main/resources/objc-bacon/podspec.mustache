@@ -1,0 +1,31 @@
+#
+# Be sure to run `pod lib lint cabfare-client.podspec' to ensure this is a
+# valid spec and remove all comments before submitting the spec.
+#
+# Any lines starting with a # are optional, but encouraged
+#
+# To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
+#
+
+Pod::Spec.new do |s|
+  s.name             = "cabfare-client-api"
+  s.version          = "{{appVersion}}"
+  s.summary          = "{{appName}}"
+  s.description      = <<-DESC
+                       {{appDescription}}
+                       DESC
+  s.homepage         = "https://bitbucket.org/outware/cabfare-client-api"
+  s.license          = "{{licenseInfo}}"
+  s.author           = { "{{infoName}}" => "{{infoEmail}}" }
+  s.source           = { :git => "git@bitbucket.org:outware/cabfare-client-api.git", :tag => "v#{s.version.to_s}" }
+
+  s.platform     = :ios, '7.0'
+  s.requires_arc = true
+
+  s.source_files = 'objc/Classes/**/*.{h,m}'
+  s.resource_bundles = {
+    'cabfare-client-api' => ['objc/Assets/*.png']
+  }
+
+  s.dependency 'AFNetworking', '~> 2.4.0'
+end
