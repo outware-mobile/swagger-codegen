@@ -70,7 +70,9 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
       }
       else
         hostBuilder.append("https://");
-      hostBuilder.append(swagger.getHost()).append(swagger.getBasePath());
+      hostBuilder.append(swagger.getHost());
+      if (swagger.getBasePath() != null)
+        hostBuilder.append(swagger.getBasePath());
       String basePath = hostBuilder.toString();
 
       List<Object> allOperations = new ArrayList<Object>();
