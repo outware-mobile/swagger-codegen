@@ -5,6 +5,7 @@
 @synthesize date = _date;
 
 - (id) initWithValues:(NSString*)input {
+    self = [super init];
     if([input isKindOfClass:[NSString class]]){
         NSDateFormatter* df = [NSDateFormatter new];
         NSLocale *locale = [[NSLocale new]
