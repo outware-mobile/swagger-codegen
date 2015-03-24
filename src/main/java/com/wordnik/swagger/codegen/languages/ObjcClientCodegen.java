@@ -93,7 +93,7 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
     supportingFiles.add(new SupportingFile("SWGObject.h", sourceFolder, "SWGObject.h"));
     supportingFiles.add(new SupportingFile("SWGObject.m", sourceFolder, "SWGObject.m"));
     supportingFiles.add(new SupportingFile("SWGApiClient.h", sourceFolder, "SWGApiClient.h"));
-    supportingFiles.add(new SupportingFile("SWGApiClient.m", sourceFolder, "SWGApiClient.m"));
+    supportingFiles.add(new SupportingFile("SWGApiClient.mustache", sourceFolder, "SWGApiClient.m"));
     supportingFiles.add(new SupportingFile("SWGFile.h", sourceFolder, "SWGFile.h"));
     supportingFiles.add(new SupportingFile("SWGFile.m", sourceFolder, "SWGFile.m"));
     supportingFiles.add(new SupportingFile("SWGDate.h", sourceFolder, "SWGDate.h"));

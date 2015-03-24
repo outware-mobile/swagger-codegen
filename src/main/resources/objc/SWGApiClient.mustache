@@ -102,11 +102,13 @@ static NSString acceptHeaderValue = [NSString stringWithFormat:@"application/vnd
 }
 
 +(NSNumber*) queueRequest {
-    NSNumber* requestId = [SWGApiClient nextRequestId];
-    if(loggingEnabled)
-        NSLog(@"added %@ to request queue", requestId);
-    [queuedRequests addObject:requestId];
-    return requestId;
+    @synchronized(self) {
+        NSNumber* requestId = [SWGApiClient nextRequestId];
+        if(loggingEnabled)
+            NSLog(@"added %@ to request queue", requestId);
+        [queuedRequests addObject:requestId];
+        return requestId;
+    }
 }
 
 +(void) cancelRequest:(NSNumber*)requestId {
