@@ -36,6 +36,7 @@ public class AndroidClientCodegen extends DefaultCodegen implements CodegenConfi
     additionalProperties.put("artifactVersion", artifactVersion);
 
     supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml"));
+    supportingFiles.add(new SupportingFile("apiconsts.mustache", apiFileFolder(), "ApiConsts.java"));
 
     languageSpecificPrimitives = new HashSet<String>(
       Arrays.asList(

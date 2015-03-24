@@ -148,8 +148,8 @@ public class DefaultGenerator implements Generator {
 
       Map<String, Object> apis = new HashMap<String, Object>();
       apis.put("apis", allOperations);
-      if(swagger.getBasePath() != null) {
-        bundle.put("basePath", swagger.getBasePath());
+      if(basePath != null) {
+        bundle.put("basePath", basePath);
       }
       bundle.put("apiInfo", apis);
       bundle.put("models", allModels);
