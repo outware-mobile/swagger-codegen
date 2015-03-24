@@ -15,6 +15,8 @@ static AFNetworkReachabilityStatus reachabilityStatus = AFNetworkReachabilitySta
 static NSOperationQueue* sharedQueue;
 static void (^reachabilityChangeBlock)(int);
 static bool loggingEnabled = false;
+static NSString apiVersion = @"{{version}}"
+static NSString acceptHeaderValue = [NSString stringWithFormat:@"application/vnd.netball.com.au+json; version=%@", apiVersion];
 
 +(void)setLoggingEnabled:(bool) state {
     loggingEnabled = state;
@@ -299,7 +301,7 @@ static bool loggingEnabled = false;
             [request setValue:[headerParams valueForKey:key] forHTTPHeaderField:key];
         }
     }
-    [request setValue:[headerParams valueForKey:responseContentType] forHTTPHeaderField:@"Accept"];
+    [request setValue:acceptHeaderValue forHTTPHeaderField:@"Accept"];
     
     // Always disable cookies!
     [request setHTTPShouldHandleCookies:NO];
@@ -399,7 +401,7 @@ static bool loggingEnabled = false;
             [request setValue:[headerParams valueForKey:key] forHTTPHeaderField:key];
         }
     }
-    [request setValue:[headerParams valueForKey:responseContentType] forHTTPHeaderField:@"Accept"];
+    [request setValue:acceptHeaderValue forHTTPHeaderField:@"Accept"];
     
     // Always disable cookies!
     [request setHTTPShouldHandleCookies:NO];

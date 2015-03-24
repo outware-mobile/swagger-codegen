@@ -49,6 +49,9 @@ public class DefaultGenerator implements Generator {
           if(contact.getEmail() != null)
             config.additionalProperties().put("infoEmail", contact.getEmail());
         }
+        if(info.getVersion() != null) {
+          config.additionalProperties().put("version", info.getVersion());
+        }
         if(info.getLicense() != null) {
           License license = info.getLicense();
           if(license.getName() != null)
