@@ -15,8 +15,8 @@ static AFNetworkReachabilityStatus reachabilityStatus = AFNetworkReachabilitySta
 static NSOperationQueue* sharedQueue;
 static void (^reachabilityChangeBlock)(int);
 static bool loggingEnabled = false;
-static NSString apiVersion = @"{{version}}"
-static NSString acceptHeaderValue = [NSString stringWithFormat:@"application/vnd.netball.com.au+json; version=%@", apiVersion];
+static NSString * apiVersion = @"{{version}}";
+static NSString * acceptHeaderValue = @"application/vnd.netball.com.au+json; version={{version}}";
 
 +(void)setLoggingEnabled:(bool) state {
     loggingEnabled = state;
