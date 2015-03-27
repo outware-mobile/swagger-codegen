@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 
-version = '{{clientVersion}}'
+version = '0.3.3'
 
 repositories {
     jcenter()
@@ -34,7 +34,7 @@ task uploadRelease(dependsOn: build) << {
 uploadArchives {
     repositories {
     mavenDeployer {
-        repository(url: "http://your_maven_repo")
+        repository(url: "http://teal.local:8081/artifactory/libs-release-local")
 
         pom.groupId = "{{groupId}}"
         pom.artifactId = "{{artifactId}}"
