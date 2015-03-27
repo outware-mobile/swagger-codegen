@@ -5,6 +5,8 @@ import {{invokerPackage}}.ApiCallback;
 import {{invokerPackage}}.ApiConsts;
 import {{invokerPackage}}.ApiError;
 
+import com.google.gson.Gson;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -38,7 +40,7 @@ public class {{classname}} {
      */
     public static {{classname}} getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new PetApi();
+            INSTANCE = new {{classname}}();
         }
         return INSTANCE;
     }
@@ -55,7 +57,7 @@ public class {{classname}} {
         * @param callback Retrofit callback for responses (success and failure)
         */
         @{{httpMethod}}("{{path}}")
-        public void {{nickname}} ({{#allParams}}{{#isPathParam}}@Path{{/isPathParam}}{{#isHeaderParam}}@Header{{/isHeaderParam}}{{#isBodyParam}}@Body{{/isBodyParam}}{{#isQueryParam}}@Query{{/isQueryParam}}{{#isFormParam}}@Field{{/isFormParam}}{{^isBodyParam}}("{{paramName}}"){{/isBodyParam}} {{{dataType}}} {{paramName}}, {{/allParams}}Callback<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}}> callback);
+        public void {{nickname}} ({{#allParams}}{{#isPathParam}}@Path{{/isPathParam}}{{#isHeaderParam}}@Header{{/isHeaderParam}}{{#isBodyParam}}@Body{{/isBodyParam}}{{#isQueryParam}}@Query{{/isQueryParam}}{{#isFormParam}}@Field{{/isFormParam}}{{^isBodyParam}}("{{baseName}}"){{/isBodyParam}} {{{dataType}}} {{paramName}}, {{/allParams}}Callback<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Object{{/returnType}}> callback);
     {{/operation}}
     }
 
@@ -86,6 +88,7 @@ public class {{classname}} {
             @Override
             public void failure(RetrofitError error) {
                 ApiError apiError = null;
+                Gson gson = new Gson();
 
                 try {
                     switch (error.getKind()) {
@@ -97,7 +100,7 @@ public class {{classname}} {
                         int status = error.getResponse().getStatus();
                         switch (status) {
                         {{#errorList}}case {{code}}:
-                            {{#schema}}apiError = new ApiError<{{responseModel}}>(status, gson.fromJson(error.getResponse().toString(), {{responseModel}}.class), error.getCause());{{/schema}}{{^schema}}apiError = new ApiError<String>(status, "{{message}}", error.getCause());{{/schema}}
+                            {{#schema}}apiError = new ApiError<io.swagger.client.model.{{responseModel}}>(status, gson.fromJson(error.getResponse().toString(), io.swagger.client.model.{{responseModel}}.class), error.getCause());{{/schema}}{{^schema}}apiError = new ApiError<String>(status, "{{message}}", error.getCause());{{/schema}}
                             break;
                         {{/errorList}}default:
                             apiError = new ApiError<String>(status, ApiConsts.UNSPECIFIED_ERROR_STRING, error.getCause());

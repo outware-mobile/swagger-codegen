@@ -35,4 +35,22 @@ public class AndroidRetrofitClientCodegen extends AndroidClientCodegen implement
       (sourceFolder + File.separator + invokerPackage).replace(".", File.separator), "ApiAdapter.java"));
   }
 
+  /**
+   * Converts the parameter names to Java standard camel-case parameter names.
+   */
+  @Override
+  public String toParamName(String name) {
+    if(name.contains("-")) {
+      String[] words = name.split("-+");
+      name = "";
+      for(int i = 0; i < words.length; i++) {
+        words[i] = words[i].toLowerCase();
+        if(i != 0) {
+          words[i] = words[i].replaceFirst(".", "" + Character.toUpperCase(words[i].charAt(0)));
+        }
+        name = name.concat(words[i]);
+      }
+    }
+    return super.toParamName(name);
+  }
 }
