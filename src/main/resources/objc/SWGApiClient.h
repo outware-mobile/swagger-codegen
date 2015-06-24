@@ -1,6 +1,13 @@
 #import <Foundation/Foundation.h>
 #import "AFHTTPSessionManager.h"
 
+
+/**
+ *  Use on NSError* returned in completion handlers for the response body
+ */
+extern NSString *const kErrorResponseBodyKey;
+
+
 @interface SWGApiClient : AFHTTPSessionManager
 
 @property(nonatomic, assign) NSURLRequestCachePolicy cachePolicy;
@@ -52,13 +59,5 @@
      responseContentType:(NSString*) responseContentType
          completionBlock:(void (^)(NSDictionary*, NSError *))completionBlock;
 
--(NSNumber*)  stringWithCompletionBlock:(NSString*) path
-                                 method:(NSString*) method
-                            queryParams:(NSDictionary*) queryParams
-                                   body:(id) body
-                           headerParams:(NSDictionary*) headerParams
-                     requestContentType:(NSString*) requestContentType
-                    responseContentType:(NSString*) responseContentType
-                        completionBlock:(void (^)(NSString*, NSError *))completionBlock;
 @end
 

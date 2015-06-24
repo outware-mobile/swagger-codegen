@@ -5,18 +5,29 @@
 #import "AFURLResponseSerialization.h"
 #import "AFURLRequestSerialization.h"
 
+
+NSString *const kErrorResponseBodyKey = @"response";
+
+static NSString *const kApiVersion = @"{{version}}";
+
+static NSString *const kAcceptHeaderField = @"Accept";
+static NSString *const kAcceptHeaderValue = @"application/vnd.netball.com.au+json; version={{version}}";
+
+
 @implementation SWGApiClient
 
+
 static long requestId = 0;
-static bool offlineState = false;
-static NSMutableSet * queuedRequests = nil;
-static bool cacheEnabled = false;
-static AFNetworkReachabilityStatus reachabilityStatus = AFNetworkReachabilityStatusNotReachable;
 static NSOperationQueue* sharedQueue;
-static void (^reachabilityChangeBlock)(int);
+static NSMutableSet *queuedRequests = nil;
+
+static bool offlineState = false;
+static bool cacheEnabled = false;
 static bool loggingEnabled = false;
-static NSString * apiVersion = @"{{version}}";
-static NSString * acceptHeaderValue = @"application/vnd.netball.com.au+json; version={{version}}";
+
+static AFNetworkReachabilityStatus reachabilityStatus = AFNetworkReachabilityStatusNotReachable;
+static void (^reachabilityChangeBlock)(int);
+
 
 +(void)setLoggingEnabled:(bool) state {
     loggingEnabled = state;
@@ -303,7 +314,7 @@ static NSString * acceptHeaderValue = @"application/vnd.netball.com.au+json; ver
             [request setValue:[headerParams valueForKey:key] forHTTPHeaderField:key];
         }
     }
-    [request setValue:acceptHeaderValue forHTTPHeaderField:@"Accept"];
+    [request setValue:kAcceptHeaderValue forHTTPHeaderField:kAcceptHeaderField];
     
     // Always disable cookies!
     [request setHTTPShouldHandleCookies:NO];
@@ -329,7 +340,8 @@ static NSString * acceptHeaderValue = @"application/vnd.netball.com.au+json; ver
         if([self executeRequestWithId:requestId]) {
             if(self.logServerResponses)
                 [self logResponse:nil forRequest:request error:error];
-            completionBlock(nil, error);
+            
+            completionBlock(nil, [self withError:error addResponse:operation.responseObject]);
         }
 
     }];
@@ -339,96 +351,21 @@ static NSString * acceptHeaderValue = @"application/vnd.netball.com.au+json; ver
  return requestId;
 }
 
--(NSNumber*)  stringWithCompletionBlock:(NSString*) path
-                                 method:(NSString*) method
-                            queryParams:(NSDictionary*) queryParams
-                                   body:(id) body
-                           headerParams:(NSDictionary*) headerParams
-                     requestContentType:(NSString*) requestContentType
-                    responseContentType:(NSString*) responseContentType
-                        completionBlock:(void (^)(NSString*, NSError *))completionBlock {
-    
-    NSMutableURLRequest * request = nil;
-    
-    if ([body isKindOfClass:[SWGFile class]]){
-        SWGFile * file = (SWGFile*) body;
-        
-        request = [self.requestSerializer multipartFormRequestWithMethod:@"POST"
-                                                               URLString:path
-                                                              parameters:nil
-                                               constructingBodyWithBlock:^(id <AFMultipartFormData> formData) {
-                                                   [formData appendPartWithFileData:[file data]
-                                                                               name:@"image"
-                                                                           fileName:[file name]
-                                                                           mimeType:[file mimeType]];}
-                                                                   error:nil];
-
-    }
-    else
+- (NSError *)withError:(NSError *)error addResponse:(NSDictionary *)response
+{
+    if (!error)
     {
-        request = [self.requestSerializer requestWithMethod:method
-                                                  URLString:[self pathWithQueryParamsToString:path
-                                                                                  queryParams:queryParams]
-                                                 parameters:body
-                                                      error:nil];
+        return nil;
+    }
+    else if (!response)
+    {
+        return error;
     }
     
-    BOOL hasHeaderParams = false;
-    if(headerParams != nil && [headerParams count] > 0)
-        hasHeaderParams = true;
-    if(offlineState) {
-        NSLog(@"%@ cache forced", path);
-        [request setCachePolicy:NSURLRequestReturnCacheDataDontLoad];
-    }
-    else if(!hasHeaderParams && [method isEqualToString:@"GET"] && cacheEnabled) {
-        NSLog(@"%@ cache enabled", path);
-        [request setCachePolicy:NSURLRequestUseProtocolCachePolicy];
-    }
-    else {
-        NSLog(@"%@ cache disabled", path);
-        [request setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
-    }
+    NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
+    [userInfo setObject:response forKey:kErrorResponseBodyKey];
     
-    if(body != nil) {
-        if([body isKindOfClass:[NSDictionary class]]){
-            [request setValue:requestContentType forHTTPHeaderField:@"Content-Type"];
-        }
-        else if ([body isKindOfClass:[SWGFile class]]){}
-        else {
-            NSAssert(false, @"unsupported post type!");
-        }
-    }
-    if(headerParams != nil){
-        for(NSString * key in [headerParams keyEnumerator]){
-            [request setValue:[headerParams valueForKey:key] forHTTPHeaderField:key];
-        }
-    }
-    [request setValue:acceptHeaderValue forHTTPHeaderField:@"Accept"];
-    
-    // Always disable cookies!
-    [request setHTTPShouldHandleCookies:NO];
-    
-    NSNumber* requestId = [SWGApiClient queueRequest];
-    AFHTTPRequestOperation *op = [[AFHTTPRequestOperation alloc] initWithRequest:request];
-    [op setCompletionBlockWithSuccess:
-     ^(AFHTTPRequestOperation *resp,
-       id responseObject) {
-         NSString *response = [resp responseString];
-         if([self executeRequestWithId:requestId]) {
-             if(self.logServerResponses)
-                 [self logResponse:responseObject forRequest:request error:nil];
-             completionBlock(response, nil);
-         }
-     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-         if([self executeRequestWithId:requestId]) {
-             if(self.logServerResponses)
-                 [self logResponse:nil forRequest:request error:error];
-             completionBlock(nil, error);
-         }
-     }];
-    [self.operationQueue addOperation:op];
-
-    return requestId;
+    return [NSError errorWithDomain:error.domain code:error.code userInfo:userInfo];
 }
 
 @end
